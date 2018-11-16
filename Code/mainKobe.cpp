@@ -21,7 +21,7 @@ int L2R = A4;
 class Data
 {
 private:
-  long penaltyTimeLenght = 6000;
+  long penaltyTimeLenght = 6000;  //spenalty time when paused
   long startTime1;
   long startTime2;
   long time1;
@@ -33,7 +33,7 @@ private:
   bool statePause = false;
   int pausetime = 0;
 
-  void addPentaltyTime()
+  void addPentaltyTime()  //Pentaly time gets added to current timer
   {
     if (stateCounter1 == true)
     {
@@ -49,19 +49,19 @@ public:
   String name;
   int number = 0;
 
-  Data(String na, int nu)
+  Data(String na, int nu) //give a name and number to the timer
   {
     name = na;
     number = nu;
   }
 
-  void startCounter1()
+  void startCounter1()  //set te starttime of counter 1
   {
 
     startTime1 = millis();
     stateCounter1 = true;
   }
-  void stopCounter1()
+  void stopCounter1() //stop counter 1 and save the data
   {
 
     if (statePause == false)
@@ -72,12 +72,12 @@ public:
     }
   }
 
-  void startCounter2()
+  void startCounter2() //set te starttime of counter 2
   {
     startTime2 = millis();
     stateCounter2 = true;
   }
-  void stopCounter2()
+  void stopCounter2() //stop counter 2 and save the data
   {
     if (statePause == false)
     {
@@ -86,7 +86,7 @@ public:
       totalTime = totalTime + time2;
     }
   }
-  void pauseTimer()
+  void pauseTimer() //wwen the timer gets paused, save the time until 
   {
     statePause = true;
     if (stateCounter1 == true)
@@ -98,7 +98,7 @@ public:
       pauseTime = millis() - startTime2;
     }
   }
-  void restartTimer()
+  void restartTimer() //when the timer gets restarted, reset the starttime that's counted up with the pentaltytime
   {
     if (stateCounter1 == true)
     {
@@ -112,11 +112,13 @@ public:
     statePause = false;
   }
 
-  void displayTime()
+  void displayTime()  //displays the times on the serial monitor
   {
-    Serial.printf("tijd 1: %l", time1);
+    Serial.sprintf("tijd 1: %l", time1);
     Serial.print("tijd 2: ");
     Serial.println(time2);
+    Serial.print("totale tijd: ");
+    Serial.println(totalTime);
   }
 
   void checkLedState()
