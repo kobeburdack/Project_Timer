@@ -33,7 +33,7 @@ private:
   bool statePause = false;
   int pausetime = 0;
 
-  void addPentaltyTime()  //Pentaly time gets added to current timer
+ /* void addPentaltyTime()  //Pentaly time gets added to current timer
   {
     if (stateCounter1 == true)
     {
@@ -44,7 +44,7 @@ private:
       startTime2 = startTime2 + penaltyTimeLenght;
     }
   }
-
+*/
 public:
   String name;
   int number = 0;
@@ -114,7 +114,8 @@ public:
 
   void displayTime()  //displays the times on the serial monitor
   {
-    Serial.sprintf("tijd 1: %l", time1);
+    Serial.print("tijd 1: ");
+    Serial.println(time1);
     Serial.print("tijd 2: ");
     Serial.println(time2);
     Serial.print("totale tijd: ");
@@ -147,6 +148,35 @@ public:
   long getTime1() { return time1; }
   long getTime2() { return time2; }
 };
+
+class CountDown{
+private:
+long startCounter;
+long countDownTime = 45000;  //maximal time before start of timer
+long time;
+
+public:
+
+void editCountDownTime(long t){
+  countDownTime = t;
+}
+
+void startCountdown(){
+ startCounter = millis();
+}
+
+long getTimeCountDown(){
+  time = countDownTime - millis() + startCounter;
+  return time;
+}
+
+void displayTimeCountDown(){
+  Serial.print("time: ");
+  Serial.println(getTimeCountDown());
+}
+
+};
+
 
 Data D1("bob", 1);
 
