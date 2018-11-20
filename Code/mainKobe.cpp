@@ -1,14 +1,4 @@
-/*#include <Arduino.h>
 
-void setup()
-{
-  Serial.begin(9600);
-}
-
-void loop()
-{
-  // put your main code here, to run repeatedly:
-}*/
 
 #include <Arduino.h>
 
@@ -18,10 +8,19 @@ int L2G = A2;
 int L2O = A3;
 int L2R = A4;
 
+int TimeSeparate(long t)
+{
+  static int array[3];
+  array[0] = t / 60000;
+  array[1] = (t % (array[0] * 60000)) / 1000;
+  array[2] = array[0] % (array[1] * 1000);
+  return array;
+}
+
 class Data
 {
 private:
-  long penaltyTimeLenght = 6000;  //spenalty time when paused
+  long penaltyTimeLenght = 6000; //spenalty time when paused
   long startTime1;
   long startTime2;
   long time1;
@@ -33,7 +32,7 @@ private:
   bool statePause = false;
   int pausetime = 0;
 
- /* void addPentaltyTime()  //Pentaly time gets added to current timer
+  /* void addPentaltyTime()  //Pentaly time gets added to current timer
   {
     if (stateCounter1 == true)
     {
@@ -55,7 +54,7 @@ public:
     number = nu;
   }
 
-  void startCounter1()  //set te starttime of counter 1
+  void startCounter1() //set te starttime of counter 1
   {
 
     startTime1 = millis();
@@ -86,7 +85,7 @@ public:
       totalTime = totalTime + time2;
     }
   }
-  void pauseTimer() //wwen the timer gets paused, save the time until 
+  void pauseTimer() //wwen the timer gets paused, save the time until
   {
     statePause = true;
     if (stateCounter1 == true)
@@ -112,7 +111,7 @@ public:
     statePause = false;
   }
 
-  void displayTime()  //displays the times on the serial monitor
+  void displayTime() //displays the times on the serial monitor
   {
     Serial.print("tijd 1: ");
     Serial.println(time1);
@@ -149,42 +148,50 @@ public:
   long getTime2() { return time2; }
 };
 
-class CountDown{
+class CountDown
+{
 private:
-long startCounter;
-long countDownTime = 45000;  //maximal time before start of timer
-long time;
+  long startCounter;
+  long countDownTime = 4500; //maximal time before start of timer
+  long time;
 
 public:
+  void editCountDownTime(long t)
+  {
+    countDownTime = t;
+  }
 
-void editCountDownTime(long t){
-  countDownTime = t;
-}
+  void startCountdown()
+  {
+    startCounter = millis();
+  }
 
-void startCountdown(){
- startCounter = millis();
-}
+  long getTimeCountDown()
+  {
+    time = countDownTime + startCounter - millis();
+    return time;
+  }
 
-long getTimeCountDown(){
-  time = countDownTime - millis() + startCounter;
-  return time;
-}
-
-void displayTimeCountDown(){
-  Serial.print("time: ");
-  Serial.println(getTimeCountDown());
-}
-
+  void displayTimeCountDown()
+  {
+    Serial.print("time: ");
+    Serial.println(getTimeCountDown());
+  }
 };
 
-
 Data D1("bob", 1);
+CountDown T1;
 
 void setup()
 {
-  delay(20);
   Serial.begin(9600);
-  D1.displayTime();
+
+  T1.startCountdown();
+  while (T1.getTimeCountDown() > 0)
+  {
+    T1.displayTimeCountDown();
+  }
+  delay(20);
   D1.startCounter1();
   delay(5000);
   D1.stopCounter1();
@@ -197,6 +204,10 @@ void setup()
   D1.stopCounter2();
   D1.displayTime();
   Serial.println(D1.getTotalTime());
+  TimeSeparate(getTotalTime());
+  Serial.println(TimeSeparate[0]);
+  Serial.println(TimeSeparate[1]);
+  Serial.println(TimeSeparate[2]);
 }
 
 void loop() {}
