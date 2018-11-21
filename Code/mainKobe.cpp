@@ -1,4 +1,28 @@
+/*
+#include <Arduino.h>
 
+void setup()
+{
+  Serial.begin(9600);
+}
+
+void loop()
+{
+  // put your main code here, to run repeatedly:
+}
+
+*/
+/*#include <Arduino.h>
+
+void setup()
+{
+  Serial.begin(9600);
+}
+
+void loop()
+{
+  // put your main code here, to run repeatedly:
+}*/
 
 #include <Arduino.h>
 
@@ -7,14 +31,18 @@ int L1R = A1;
 int L2G = A2;
 int L2O = A3;
 int L2R = A4;
+static int timeSeparate[3];
 
-int TimeSeparate(long t)
+void TimeSeparate(long t)
 {
-  static int array[3];
-  array[0] = t / 60000;
-  array[1] = (t % (array[0] * 60000)) / 1000;
-  array[2] = array[0] % (array[1] * 1000);
-  return array;
+  timeSeparate[0] = t / 60000;
+  timeSeparate[1] = (t % (timeSeparate[0] * 60000)) / 1000;
+  timeSeparate[2] = t - (timeSeparate[0] * 60000) - (timeSeparate[1] * 1000);
+  Serial.print(timeSeparate[0]);
+  Serial.print(":");
+  Serial.print(timeSeparate[1]);
+  Serial.print(":");
+  Serial.println(timeSeparate[2]);
 }
 
 class Data
@@ -32,18 +60,6 @@ private:
   bool statePause = false;
   int pausetime = 0;
 
-  /* void addPentaltyTime()  //Pentaly time gets added to current timer
-  {
-    if (stateCounter1 == true)
-    {
-      startTime1 = startTime1 + penaltyTimeLenght;
-    }
-    if (stateCounter2 == true)
-    {
-      startTime2 = startTime2 + penaltyTimeLenght;
-    }
-  }
-*/
 public:
   String name;
   int number = 0;
@@ -144,8 +160,22 @@ public:
   }
 
   long getTotalTime() { return totalTime; }
-  long getTime1() { return time1; }
-  long getTime2() { return time2; }
+  long getTime1()
+  {
+    if (stateCounter1 == true)
+    {
+      return millis() - startTime1;
+    }
+    return time1;
+  }
+  long getTime2()
+  {
+    if (stateCounter1 == true)
+    {
+      return millis() - startTime2;
+    }
+    return time;
+  }
 };
 
 class CountDown
@@ -187,10 +217,7 @@ void setup()
   Serial.begin(9600);
 
   T1.startCountdown();
-  while (T1.getTimeCountDown() > 0)
-  {
-    T1.displayTimeCountDown();
-  }
+
   delay(20);
   D1.startCounter1();
   delay(5000);
@@ -200,14 +227,11 @@ void setup()
   D1.pauseTimer();
   delay(100);
   D1.restartTimer();
-  delay(1000);
+  delay(1248);
   D1.stopCounter2();
   D1.displayTime();
   Serial.println(D1.getTotalTime());
-  TimeSeparate(getTotalTime());
-  Serial.println(TimeSeparate[0]);
-  Serial.println(TimeSeparate[1]);
-  Serial.println(TimeSeparate[2]);
+  TimeSeparate(D1.getTotalTime());
 }
 
 void loop() {}
