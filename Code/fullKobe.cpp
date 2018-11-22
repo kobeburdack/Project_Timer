@@ -1,28 +1,4 @@
-/*
-#include <Arduino.h>
 
-void setup()
-{
-  Serial.begin(9600);
-}
-
-void loop()
-{
-  // put your main code here, to run repeatedly:
-}
-
-*/
-/*#include <Arduino.h>
-
-void setup()
-{
-  Serial.begin(9600);
-}
-
-void loop()
-{
-  // put your main code here, to run repeatedly:
-}*/
 
 #include <Arduino.h>
 
@@ -216,6 +192,21 @@ class CountDown
     }
 };
 
+class Communication{
+    private:
+        int port;
+    public:
+        Communication(int adress){port = adress;}
+        void startCom(){}
+        void stopCom(){}
+        void checkCom(){}
+        bool getState(){
+            return digitalRead(port);
+        }
+};
+
+
+
 void pause(){   //ISR function to pause the timer
     D1.pauseTimer();
     D1.checkLedState();
@@ -225,11 +216,16 @@ void pause(){   //ISR function to pause the timer
 }
 
 Data D1("bob", 1);
+Communication R1(11);
+Communication R2(12);
+Communication R3(13);
 CountDown T1;
 
 void setup()
 {
-    
+    pinMode(11, INPUT_PULLUP);
+    pinMode(12, INPUT_PULLUP);
+    pinMode(13, INPUT_PULLUP);
     for (int i = 0; i <= 9; i++)
     { //set switches on inputs with pullup
         pinMode(switches[i], INPUT_PULLUP);
@@ -264,7 +260,7 @@ void setup()
 void loop()
 {
 
-    if (switches[2] == LOW)
+    if (digitalRead(switches[2]) == LOW)
     {
         D1.checkLedState();
         R1.checkCom();
@@ -272,12 +268,12 @@ void loop()
         R3.checkCom();
     }
 
-    if (switches[3] == LOW)
+    if (digitalRead(switches[3]) == LOW)
     {
         T1.startCountdown();
         R1.startCom();
 
-        while (T1.getTimeCountDown() > 0 && C1 == HIGH)
+        while (T1.getTimeCountDown() > 0 && R1.getState() == HIGH)
         {
             TimeSeparate(T1.getTimeCountDown());
             D1.checkLedState();
@@ -288,18 +284,18 @@ void loop()
         R2.startCom();
         D1.checkLedState();
 
-        while (C2 == HIGH)
+        while (R2.getState() == HIGH)
         {
             TimeSeparate(D1.getTime1());
         }
         D1.stopCounter1();
-        if (switches[1] == HIGH)
+        if (digitalRead(switches[1]) == HIGH)
         {
             D1.startCounter2();
             R2.stopCom();
             R3.startCom();
             D1.checkLedState();
-            while (C3 == HIGH)
+            while (R3.getState() == HIGH)
             {
                 TimeSeparate(D1.getTime2());
             }
