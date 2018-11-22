@@ -216,16 +216,25 @@ class CountDown
     }
 };
 
+void pause(){   //ISR function to pause the timer
+    D1.pauseTimer();
+    D1.checkLedState();
+    while(digitalRead(switches[8]) == HIGH){}
+    D1.restartTimer();
+    D1.checkLedState();
+}
+
 Data D1("bob", 1);
 CountDown T1;
 
 void setup()
 {
-
+    
     for (int i = 0; i <= 9; i++)
     { //set switches on inputs with pullup
         pinMode(switches[i], INPUT_PULLUP);
     }
+    attachInterrupt(digitalPinToInterrupt(switches[7]), pause, LOW);
     pinMode(L1G, OUTPUT);
     pinMode(L1R, OUTPUT);
     pinMode(L2G, OUTPUT);
