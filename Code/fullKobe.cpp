@@ -8,7 +8,7 @@ int L2G = A2;
 int L2O = A3;
 int L2R = A4;
 
-int switches[]{8, A1, 0, 1, 2, 3, 4, 5, 6, 7}; //defining switches and butons
+int switches[]{8, A5, 0, 1, 5, 3, 4, 2, 6, 7}; //defining switches and butons
 
 int C1;
 int C2;
@@ -21,23 +21,67 @@ void TimeSeparate(long t)
     timeSeparate[0] = t / 60000;
     timeSeparate[1] = (t % (timeSeparate[0] * 60000)) / 1000;
     timeSeparate[2] = t - (timeSeparate[0] * 60000) - (timeSeparate[1] * 1000);
+    if (timeSeparate[0] <= 9)
+    {
+        Serial.print("0");
+    }
     Serial.print(timeSeparate[0]);
     Serial.print(":");
+    if (timeSeparate[1] <= 9)
+    {
+        Serial.print("0");
+    }
     Serial.print(timeSeparate[1]);
     Serial.print(":");
+    if (timeSeparate[2] <= 9)
+    {
+        Serial.print("00");
+    }
+    else if (timeSeparate[2] <= 99)
+    {
+        Serial.print("0");
+    }
     Serial.println(timeSeparate[2]);
 }
 
 class Data
 {
   private:
+    void TimeSeparate(long t)
+    {
+        timeSeparate[0] = t / 60000;
+        timeSeparate[1] = (t % (timeSeparate[0] * 60000)) / 1000;
+        timeSeparate[2] = t - (timeSeparate[0] * 60000) - (timeSeparate[1] * 1000);
+        if (timeSeparate[0] <= 9)
+        {
+            Serial.print("0");
+        }
+        Serial.print(timeSeparate[0]);
+        Serial.print(":");
+        if (timeSeparate[1] <= 9)
+        {
+            Serial.print("0");
+        }
+        Serial.print(timeSeparate[1]);
+        Serial.print(":");
+        if (timeSeparate[2] <= 9)
+        {
+            Serial.print("00");
+        }
+        else if (timeSeparate[2] <= 99)
+        {
+            Serial.print("0");
+        }
+        Serial.println(timeSeparate[2]);
+    }
+
     long penaltyTimeLenght = 6000; //spenalty time when paused
-    long startTime1;
-    long startTime2;
-    long time1;
-    long time2;
-    long pauseTime;
-    long totalTime;
+    long startTime1 = 0;
+    long startTime2 = 0;
+    long time1 = 0;
+    long time2 = 0;
+    long pauseTime = 0;
+    long totalTime = 0;
     bool stateCounter1 = false;
     bool stateCounter2 = false;
     bool statePause = false;
@@ -113,28 +157,28 @@ class Data
     void displayTime() //displays the times on the serial monitor
     {
         Serial.print("tijd 1: ");
-        Serial.println(time1);
+        TimeSeparate(time1);
         Serial.print("tijd 2: ");
-        Serial.println(time2);
+        TimeSeparate(time2);
         Serial.print("totale tijd: ");
-        Serial.println(totalTime);
+        TimeSeparate(totalTime);
     }
 
     void checkLedState()
     {
-        if (stateCounter1 == true || stateCounter2 == true)
-        {
-            digitalWrite(L2G, HIGH);
-            digitalWrite(L2O, LOW);
-            digitalWrite(L2R, LOW);
-        }
         if (statePause == true)
         {
             digitalWrite(L2G, LOW);
             digitalWrite(L2O, HIGH);
             digitalWrite(L2R, LOW);
         }
-        if (stateCounter1 == false || stateCounter2 == false && statePause == false)
+        else if (stateCounter1 == true || stateCounter2 == true)
+        {
+            digitalWrite(L2G, HIGH);
+            digitalWrite(L2O, LOW);
+            digitalWrite(L2R, LOW);
+        }
+        else
         {
             digitalWrite(L2G, LOW);
             digitalWrite(L2O, LOW);
@@ -153,7 +197,7 @@ class Data
     }
     long getTime2()
     {
-        if (stateCounter1 == true)
+        if (stateCounter2 == true)
         {
             return millis() - startTime2;
         }
@@ -192,40 +236,45 @@ class CountDown
     }
 };
 
-class Communication{
-    private:
-        int port;
-    public:
-        Communication(int adress){port = adress;}
-        void startCom(){}
-        void stopCom(){}
-        void checkCom(){}
-        bool getState(){
-            return digitalRead(port);
-        }
+class Communication
+{
+  private:
+    int port;
+
+  public:
+    Communication(int adress) { port = adress; }
+    void startCom() {}
+    void stopCom() {}
+    void checkCom() {}
+    bool getState()
+    {
+        Serial.println(digitalRead(port));
+        return digitalRead(port);
+    }
 };
 
+Data D1("bob", 1);
+Communication R1(5);
+Communication R2(3);
+Communication R3(4);
+CountDown T1;
 
-
-void pause(){   //ISR function to pause the timer
+void pause()
+{ //ISR function to pause the timer
     D1.pauseTimer();
     D1.checkLedState();
-    while(digitalRead(switches[8]) == HIGH){}
+    while (digitalRead(switches[8]) == HIGH)
+    {
+    };
     D1.restartTimer();
     D1.checkLedState();
 }
 
-Data D1("bob", 1);
-Communication R1(11);
-Communication R2(12);
-Communication R3(13);
-CountDown T1;
-
 void setup()
 {
-    pinMode(11, INPUT_PULLUP);
-    pinMode(12, INPUT_PULLUP);
-    pinMode(13, INPUT_PULLUP);
+    pinMode(2, INPUT_PULLUP);
+    pinMode(3, INPUT_PULLUP);
+    pinMode(4, INPUT_PULLUP);
     for (int i = 0; i <= 9; i++)
     { //set switches on inputs with pullup
         pinMode(switches[i], INPUT_PULLUP);
@@ -238,23 +287,25 @@ void setup()
     pinMode(L2R, OUTPUT);
 
     Serial.begin(9600);
-
-    T1.startCountdown();
-    delay(20);
-    D1.startCounter1();
-    delay(5000);
-    D1.stopCounter1();
-    D1.startCounter2();
-    delay(3000);
-    D1.pauseTimer();
-    delay(100);
-    D1.restartTimer();
-    delay(1248);
-    D1.stopCounter2();
-    D1.displayTime();
-    Serial.println(D1.getTotalTime());
-    TimeSeparate(D1.getTotalTime());
-    D1.checkLedState();
+    /*
+  T1.startCountdown();
+  while(T1.getTimeCountDown() >0){
+    TimeSeparate(T1.getTimeCountDown());
+    }
+  delay(20);
+  D1.startCounter1();
+  delay(5000);
+  D1.stopCounter1();
+  D1.startCounter2();
+  delay(3000);
+  D1.pauseTimer();
+  delay(100);
+  D1.restartTimer();
+  delay(1248);
+  D1.stopCounter2();
+  D1.displayTime();
+  TimeSeparate(D1.getTotalTime());
+  D1.checkLedState();*/
 }
 
 void loop()
@@ -289,7 +340,9 @@ void loop()
             TimeSeparate(D1.getTime1());
         }
         D1.stopCounter1();
-        if (digitalRead(switches[1]) == HIGH)
+        D1.checkLedState();
+
+        if (digitalRead(switches[1]) == LOW)
         {
             D1.startCounter2();
             R2.stopCom();
@@ -302,7 +355,12 @@ void loop()
             D1.stopCounter2();
             D1.checkLedState();
             R3.stopCom();
-            D1.displayTime();
         }
+        else
+        {
+            R2.stopCom();
+        }
+        D1.displayTime();
+        delay(5000);
     }
 }
